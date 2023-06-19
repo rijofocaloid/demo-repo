@@ -1,2 +1,2 @@
 # Demo
-print "rijo"
+echo "rijo"
