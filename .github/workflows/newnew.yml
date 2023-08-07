@@ -32,36 +32,37 @@ jobs:
           docker pull owasp/zap2docker-stable
           docker run -t -v $(pwd)/zap_wrk:/zap/wrk owasp/zap2docker-stable zap-full-scan.py -t https://dev-bo.nephroplus.com/ -g gen.conf -r testreport.html
         env:
-          ZAP_CREDENTIALS: ${{ toJson({
-            authentication: {
-              method: "form",
-              parameters: {
-                loginRequestBody: "username=dev@focaloid.com&password=test&credentialId=",
-                loginPageUrl: "",
-                loginRequestUrl: "https://dev-bo.nephroplus.com/keycloak/realms/nephroplus/login-actions/authenticate.*"
+          ZAP_CREDENTIALS: |
+            {
+              "authentication": {
+                "method": "form",
+                "parameters": {
+                  "loginRequestBody": "username=dev@focaloid.com&password=test&credentialId=",
+                  "loginPageUrl": "",
+                  "loginRequestUrl": "https://dev-bo.nephroplus.com/keycloak/realms/nephroplus/login-actions/authenticate.*"
+                },
+                "verification": {
+                  "method": "response",
+                  "pollFrequency": 60,
+                  "pollUnits": "requests",
+                  "pollUrl": "",
+                  "pollPostData": ""
+                }
               },
-              verification: {
-                method: "response",
-                pollFrequency: 60,
-                pollUnits: "requests",
-                pollUrl: "",
-                pollPostData: ""
-              }
-            },
-            sessionManagement: {
-              method: "cookie",
-              parameters: {}
-            },
-            technology: {
-              exclude: []
-            },
-            parameters: {
-              failOnError: true,
-              failOnWarning: false,
-              progressToStdout: true
-            },
-            vars: {}
-          }) }}
+              "sessionManagement": {
+                "method": "cookie",
+                "parameters": {}
+              },
+              "technology": {
+                "exclude": []
+              },
+              "parameters": {
+                "failOnError": true,
+                "failOnWarning": false,
+                "progressToStdout": true
+              },
+              "vars": {}
+            }
 
       # Step 4: Upload ZAP reports as artifacts
       - name: Upload ZAP Reports
