@@ -6,16 +6,6 @@ jobs:
     name: Scan the webapplication
     steps:
       - name: Checkout
-      jobs:
-- parameters: {}
-  name: "alertFilter"
-  type: "alertFilter"
-- parameters:
-    scanOnlyInScope: true
-    enableTags: false
-  rules: []
-  name: "passiveScan-config"
-  type: "passiveScan-config"
         uses: actions/checkout@v2
         with:
           ref: master
