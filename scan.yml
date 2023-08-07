@@ -76,5 +76,5 @@ jobs:
               progressToStdout: true
             },
             vars: {}
-          }) }}'
+          }) }}'  
 
