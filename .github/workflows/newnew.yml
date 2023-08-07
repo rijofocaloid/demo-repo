@@ -1,4 +1,4 @@
-name: ZAP Scan Report
+name: ZAP Security Scan
 
 on:
   push:
@@ -12,63 +12,79 @@ jobs:
     name: ZAP Security Scan
     runs-on: ubuntu-latest
 
-    # Set up Node.js version 16
-    defaults:
-      run:
-        working-directory: ${{ github.workspace }}
-
     steps:
       # Step 1: Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Step 2: Create a working directory for ZAP
+      # Step 2: Set up Node.js version 16
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16.x"
+
+      # Step 3: Create a working directory for ZAP
       - name: Create ZAP working directory
         run: mkdir -p zap_wrk
 
-      # Step 3: Download and run ZAP container
+      # Step 4: Generate ZAP config file
+      - name: Generate ZAP config file
+        run: |
+          echo '{
+            "contexts": [
+              {
+                "name": "Automation Context",
+                "urls": [
+                  "https://dev-bo.nephroplus.com/",
+                  "https://dev-bo.nephroplus.com/bo",
+                  "https://dev-bo.nephroplus.com/keycloak"
+                ],
+                "includePaths": [
+                  "https://dev-bo.nephroplus.com/.*",
+                  "https://dev-bo.nephroplus.com/bo.*",
+                  "https://dev-bo.nephroplus.com/keycloak.*"
+                ],
+                "authentication": {
+                  "method": "form",
+                  "parameters": {
+                    "loginRequestBody": "username=dev@focaloid.com&password=test&credentialId=",
+                    "loginPageUrl": "",
+                    "loginRequestUrl": "https://dev-bo.nephroplus.com/keycloak/realms/nephroplus/login-actions/authenticate.*"
+                  },
+                  "verification": {
+                    "method": "response",
+                    "pollFrequency": 60,
+                    "pollUnits": "requests",
+                    "pollUrl": "",
+                    "pollPostData": ""
+                  }
+                },
+                "sessionManagement": {
+                  "method": "cookie",
+                  "parameters": {}
+                },
+                "technology": {
+                  "exclude": []
+                }
+              }
+            ],
+            "parameters": {
+              "failOnError": true,
+              "failOnWarning": false,
+              "progressToStdout": true
+            },
+            "vars": {}
+          }' > zap_wrk/zap_config.json
+
+      # Step 5: Download and run ZAP container
       - name: Run ZAP Security Scan
         run: |
           docker pull owasp/zap2docker-stable
-          docker run -t -v $(pwd)/zap_wrk:/zap/wrk owasp/zap2docker-stable zap-full-scan.py -t https://dev-bo.nephroplus.com/ -g gen.conf -r testreport.html
-        env:
-          ZAP_CREDENTIALS: |
-            {
-              "authentication": {
-                "method": "form",
-                "parameters": {
-                  "loginRequestBody": "username=dev@focaloid.com&password=test&credentialId=",
-                  "loginPageUrl": "",
-                  "loginRequestUrl": "https://dev-bo.nephroplus.com/keycloak/realms/nephroplus/login-actions/authenticate.*"
-                },
-                "verification": {
-                  "method": "response",
-                  "pollFrequency": 60,
-                  "pollUnits": "requests",
-                  "pollUrl": "",
-                  "pollPostData": ""
-                }
-              },
-              "sessionManagement": {
-                "method": "cookie",
-                "parameters": {}
-              },
-              "technology": {
-                "exclude": []
-              },
-              "parameters": {
-                "failOnError": true,
-                "failOnWarning": false,
-                "progressToStdout": true
-              },
-              "vars": {}
-            }
+          docker run -t -v $(pwd)/zap_wrk:/zap/wrk -e ZAP_PORT=8090 -p 8090:8090 owasp/zap2docker-stable zap-baseline.py -c zap_config.json -r zap_report.html
 
-      # Step 4: Upload ZAP reports as artifacts
-      - name: Upload ZAP Reports
+      # Step 6: Upload ZAP report as an artifact
+      - name: Upload ZAP Report
         uses: actions/upload-artifact@v2
         with:
-          name: zap-reports
-          path: |
-            zap_wrk/ZAP-Report.html
-            zap_wrk/ZAP-Report.xml
+          name: zap-report
+          path: zap_wrk/zap_report.html
