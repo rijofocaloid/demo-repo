@@ -68,6 +68,6 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: zap-reports
-          path: |
+          path: | 
             zap_wrk/ZAP-Report.html
             zap_wrk/ZAP-Report.xml
