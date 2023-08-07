@@ -1,0 +1,80 @@
+name: ZAP Scan Report
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  security_scan:
+    name: ZAP Security Scan
+    runs-on: ubuntu-latest
+
+    # Set up Node.js version 16
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}
+
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Create a working directory for ZAP
+      - name: Create ZAP working directory
+        run: mkdir -p zap_wrk
+
+      # Step 3: Download and run ZAP container
+      - name: Run ZAP Security Scan
+        run: |
+          docker pull owasp/zap2docker-stable
+          docker run -t owasp/zap2docker-stable zap-full-scan.py -t https://dev-bo.nephroplus.com/
+          docker run -v $(pwd):/zap/wrk/:rw -t owasp/zap2docker-stable zap-full-scan.py -t https://dev-bo.nephroplus.com/ -g gen.conf -r testreport.html
+
+      # Step 4: Upload ZAP reports as artifacts
+      - name: Upload ZAP Reports
+        uses: actions/upload-artifact@v2
+        with:
+          name: zap-reports
+          path: |
+            zap_wrk/ZAP-Report.html
+            zap_wrk/ZAP-Report.xml
+
+      # Step 5: Add ZAP authentication credentials
+      - name: Add ZAP credentials
+        run: |
+          echo '${{ secrets.ZAP_CREDENTIALS }}' > zap_wrk/gen.conf
+        env:
+          ZAP_CREDENTIALS: ${{ toJson({
+            authentication: {
+              method: "form",
+              parameters: {
+                loginRequestBody: "username=dev@focaloid.com&password=test&credentialId=",
+                loginPageUrl: "",
+                loginRequestUrl: "https://dev-bo.nephroplus.com/keycloak/realms/nephroplus/login-actions/authenticate.*"
+              },
+              verification: {
+                method: "response",
+                pollFrequency: 60,
+                pollUnits: "requests",
+                pollUrl: "",
+                pollPostData: ""
+              }
+            },
+            sessionManagement: {
+              method: "cookie",
+              parameters: {}
+            },
+            technology: {
+              exclude: []
+            },
+            parameters: {
+              failOnError: true,
+              failOnWarning: false,
+              progressToStdout: true
+            },
+            vars: {}
+          }) }}'
+
