@@ -6,7 +6,7 @@ jobs:
     name: Scan the web application
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.4.3
+        uses: actions/checkout@latest
         with:
           ref: master
       - name: ZAP Scan
