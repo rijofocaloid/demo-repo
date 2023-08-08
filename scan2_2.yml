@@ -1,0 +1,40 @@
+name: ZAP Scan and Report
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  zap_scan:
+    runs-on: ubuntu-latest
+    name: Run ZAP Scan
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      - name: Set up ZAP
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+          
+      - name: Run ZAP Scan
+        run: |
+          wget https://github.com/zaproxy/zaproxy/releases/download/v2.11.0/ZAP_2.11.0_Cross-platform.zip
+          unzip ZAP_2.11.0_Cross-platform.zip
+          cd ZAP_2.11.0
+          chmod +x zap.sh
+          ./zap.sh -daemon -host 0.0.0.0 -port 8080 &
+          sleep 30 # Wait for ZAP to start
+          ./zap-cli -p 8080 status -t 600
+          ./zap-cli -p 8080 open-url https://dev-bo.nephroplus.com/
+          ./zap-cli -p 8080 spider https://dev-bo.nephroplus.com/
+          ./zap-cli -p 8080 active-scan https://dev-bo.nephroplus.com/
+          ./zap-cli -p 8080 report -o /github/workspace/zap-report.html -f html
+          
+      - name: Upload ZAP Report
+        uses: actions/upload-artifact@v2
+        with:
+          name: zap-report
+          path: zap-report.html
