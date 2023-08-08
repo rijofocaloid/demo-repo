@@ -1,47 +1,40 @@
-name: 'ZAP Baseline Scan'
-description: 'Scans the web application with the ZAP Baseline Scan'
-branding:
-  icon: 'zap'
-  color: 'blue'
-inputs:
-  token:
-    description: 'GitHub Token to create issues in the repository'
-    required: false
-    default: ${{ github.token }}
-  target:
-    description: "https://dev-bo.nephroplus.com/"
-    parameters:loginRequestBody: "username=dev@focaloid.com&password=test&credentialId="
-          loginPageUrl: ""
-          loginRequestUrl: "https://dev-bo.nephroplus.com/keycloak/realms/nephroplus/login-actions/authenticate.*"
-          rules_file_name: '.zap/rules.tsv'
-          cmd_options: '-a'
-    required: true
-  rules_file_name:
-    description: 'Relative path of the ZAP configuration file'
-    required: false
-  docker_name:
-    description: 'The Docker file to be executed'
-    required: true
-    default: 'ghcr.io/zaproxy/zaproxy:stable'
-  cmd_options:
-    description: 'Additional command line options'
-    required: false
-  issue_title:
-    description: 'The title for the GitHub issue to be created'
-    required: false
-    default: 'ZAP Scan Baseline Report'
-  fail_action:
-    description: 'The action status will be set to fail if ZAP identifies any alerts during the baseline scan'
-    required: false
-    default: false
-  allow_issue_writing:
-    description: 'The action will file the report to the GitHub issue using the issue_title input'
-    required: false
-    default: true
-  artifact_name:
-    description: 'The name of the artifact that contains the ZAP reports'
-    required: false
-    default: 'zap_scan'
-runs:
-  using: 'node16'
-  main: 'dist/index.js'
+name: ZAP Scan and Report
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  zap_scan:
+    runs-on: ubuntu-latest
+    name: Run ZAP Scan
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        
+      - name: Set up ZAP
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '11'
+          
+      - name: Run ZAP Scan
+        run: |
+          wget https://github.com/zaproxy/zaproxy/releases/download/v2.11.0/ZAP_2.11.0_Cross-platform.zip
+          unzip ZAP_2.11.0_Cross-platform.zip
+          cd ZAP_2.11.0
+          chmod +x zap.sh
+          ./zap.sh -daemon -host 0.0.0.0 -port 8080 &
+          sleep 30 # Wait for ZAP to start
+          ./zap-cli -p 8080 status -t 600
+          ./zap-cli -p 8080 open-url https://dev-bo.nephroplus.com/
+          ./zap-cli -p 8080 spider https://dev-bo.nephroplus.com/
+          ./zap-cli -p 8080 active-scan https://dev-bo.nephroplus.com/
+          ./zap-cli -p 8080 report -o /github/workspace/zap-report.html -f html
+          
+      - name: Upload ZAP Report
+        uses: actions/upload-artifact@v2
+        with:
+          name: zap-report
+          path: zap-report.html
