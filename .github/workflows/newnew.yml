@@ -32,9 +32,9 @@ jobs:
         run: docker pull owasp/zap2docker-stable
       - name: Run ZAP API scan
         run: |
-          sudo docker run -v $PWD:/zap/wrk/:rw -t owasp/zap2docker-weekly zap-full-scan.py -t https://prutech.in -j -a
+          sudo docker run -t owasp/zap2docker-stable zap-baseline.py -t https://prutech.in -j -a
       - name: Save ZAP Report as Artifact
         uses: actions/upload-artifact@v2
         with:
           name: zap-scan-report
-          path: /zap/wrk/zap-report.html
+          path: .github/workflows/zap-report.html
