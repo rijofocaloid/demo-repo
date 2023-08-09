@@ -1,0 +1,30 @@
+name: Send Email via SES
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  send_email:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Configure AWS Credentials
+        run: |
+          echo "[default]" > ~/.aws/credentials
+          echo "aws_access_key_id=${{ AKIA6LBJHUQAB2EK2YVJ }}" >> ~/.aws/credentials
+          echo "aws_secret_access_key=${{ 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 }}" >> ~/.aws/credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ AKIA6LBJHUQAB2EK2YVJ }}
+          AWS_SECRET_ACCESS_KEY: ${{ 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 }}
+
+      - name: Send Email via SES
+        run: |
+          aws ses send-email \
+            --from "rijomathew@focaloid.com" \
+            --destination "ToAddresses=rijomathew@focaloid.com" \
+            --message "Subject={Data=Email Subject},Body={Text={Data=Email Body}}" \
+            --attach "Data=$(base64 -w 0 .github/workflows/blank.yml),ContentType=application/yml,Name=blank.yml"
