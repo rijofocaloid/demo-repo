@@ -32,6 +32,7 @@ jobs:
 
       - name: Send Email via SES
         run: |
+          set -x
           aws ses send-email \
             --from "rijomathew@focaloid.com" \
             --destination "ToAddresses=rijomathew@focaloid.com" \
