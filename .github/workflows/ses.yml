@@ -24,10 +24,14 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
+      - name: Attach File
+        run: |
+          base64 rijofocaloid/demo-repo/.github/workflows/blank.yml > encoded_file.txt
+
       - name: Send Email via SES
         run: |
           aws ses send-email \
             --from "rijomathew@focaloid.com" \
             --destination "ToAddresses=rijomathew@focaloid.com" \
             --message "Subject={Data=Email Subject},Body={Text={Data=Email Body}}" \
-            --attach "Data=$(base64 -w 0 rijofocaloid/demo-repo/.github/workflows/blank.yml),ContentType=application/yml,Name=blank.yml"
+            --attach "Data=$(cat encoded_file.txt),ContentType=application/octet-stream,Name=myfile.txt"
