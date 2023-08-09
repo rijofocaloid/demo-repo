@@ -26,7 +26,7 @@ jobs:
 
       - name: Attach File
         run: |
-          base64 rijofocaloid/demo-repo/.github/workflows/blank.yml > encoded_file.txt
+          base64 ~/blank.yml > encoded_file.txt
 
       - name: Send Email via SES
         run: |
