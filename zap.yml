@@ -14,7 +14,7 @@ env:
     authentication:
       method: "form"
       parameters:
-        loginRequestBody: "username=dev@neph.com&password=nephro#123="
+        loginRequestBody: "username=dev@focaloid.com&password=test&credentialId="
         loginPageUrl: ""
         loginRequestUrl: "https://dev-bo.nephroplus.com/keycloak/realms/nephroplus/login-actions/authenticate.*"
       verification:
