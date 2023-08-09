@@ -26,6 +26,8 @@ jobs:
 
       - name: Attach File
         run: |
+          touch /home/runner/blank.yml
+          echo "hellow" >> /home/runner/blank.yml
           base64 ~/blank.yml > encoded_file.txt
 
       - name: Send Email via SES
