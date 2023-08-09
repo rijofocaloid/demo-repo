@@ -1,37 +1,40 @@
-name: ZAP Scan and Report
+name: ZAP Scan Report
 
 on:
   push:
     branches:
-      - main
+      - "main"
+  pull_request:
+    branches:
+      - "main"
+  workflow_dispatch:
 
 jobs:
-  zap_scan:
+  build:
     runs-on: ubuntu-latest
-    name: Run ZAP Scan
+    name: Sanity check of git actions
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-        
-      - name: Set up ZAP
+      - name: Run a one-line script
+        run: echo "No error. Do the necessary build steps here."
+
+  scans:
+    runs-on: ubuntu-latest
+    name: ZAP API Scan
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Log current directory
+        run: echo $PWD
+      - name: Pull ZAP OWASP Image
+        run: docker pull owasp/zap2docker-stable
+      - name: Run ZAP API scan
         run: |
-          wget https://github.com/zaproxy/zaproxy/releases/download/2.11.0/ZAP_2.11.0_Cross-platform.zip
-          unzip ZAP_2.11.0_Cross-platform.zip
-          chmod +x ZAP_2.11.0/zap.sh
-          
-      - name: Run ZAP Scan
-        run: |
-          cd ZAP_2.11.0
-          ./zap.sh -daemon -host 0.0.0.0 -port 8080 &
-          sleep 30 # Wait for ZAP to start
-          ./zap-cli -p 8080 status -t 600
-          ./zap-cli -p 8080 open-url https://dev-bo.nephroplus.com/
-          ./zap-cli -p 8080 spider https://dev-bo.nephroplus.com/
-          ./zap-cli -p 8080 active-scan https://dev-bo.nephroplus.com/
-          ./zap-cli -p 8080 report -o /github/workspace/zap-report.html -f html
-          
-      - name: Upload ZAP Report
+          sudo docker run -v $PWD:/zap/wrk/:rw -t owasp/zap2docker-weekly zap-full-scan.py -t https://prutech.in -j -a
+      - name: Save ZAP Report as Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: zap-report
-          path: zap-report.html
+          name: zap-scan-report
+          path: /zap/wrk/zap-report.html
