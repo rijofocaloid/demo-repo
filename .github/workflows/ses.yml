@@ -29,6 +29,6 @@ jobs:
           aws ses send-email \
             --from "rijomathew@focaloid.com" \
             --destination "ToAddresses=rijomathew@focaloid.com" \
-            --message "Subject={Data=Email Subject},Body={Text={Data=Email Body}}" \
+            --message "Subject={Data=Hello},Body={Text={Data=hello}}" \
             
             
