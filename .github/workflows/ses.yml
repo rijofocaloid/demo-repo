@@ -30,4 +30,4 @@ jobs:
             --from "rijomathew@focaloid.com" \
             --destination "ToAddresses=rijomathew@focaloid.com" \
             --message "Subject={Data=Email Subject},Body={Text={Data=Email Body}}" \
-            --raw-message fileb://email.json
+            
