@@ -1,0 +1,40 @@
+name: ZAP Scan Report
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+    branches:
+      - "main"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Sanity check of git actions
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Run a one-line script
+        run: echo "No error. Do the necessary build steps here."
+
+  scans:
+    runs-on: ubuntu-latest
+    name: ZAP API Scan
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Log current directory
+        run: echo $PWD
+      - name: Pull ZAP OWASP Image
+        run: docker pull owasp/zap2docker-stable
+      - name: Run ZAP API scan
+        run: |
+          sudo docker run -v $PWD:/zap/wrk/:rw -t owasp/zap2docker-weekly zap-full-scan.py -t https://prutech.in -j -a
+      - name: Save ZAP Report as Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: zap-scan-report
+          path: /zap/wrk/zap-report.html
