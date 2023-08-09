@@ -36,4 +36,4 @@ jobs:
             --from "rijomathew@focaloid.com" \
             --destination "ToAddresses=rijomathew@focaloid.com" \
             --message "Subject={Data=Email Subject},Body={Text={Data=Email Body}}" \
-            --attach "Data=$(cat encoded_file.txt),ContentType=application/octet-stream,Name=myfile.txt"
+            --attach "Data=$(encoded_file.txt),ContentType=application/octet-stream,Name=myfile.txt"
