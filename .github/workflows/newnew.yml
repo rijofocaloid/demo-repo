@@ -1,43 +1,25 @@
-name: ZAP Scan Report
+name: OWASP ZAP Scan
 
 on:
   push:
     branches:
-      - "main"
-  pull_request:
-    branches:
-      - "main"
-  workflow_dispatch:
+      - main  # Change this to your default branch name
 
 jobs:
-  build:
+  zap_scan:
     runs-on: ubuntu-latest
-    name: Sanity check of git actions
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Run a one-line script
-        run: echo "No error. Do the necessary build steps here."
-
-  scans:
-    runs-on: ubuntu-latest
-    name: ZAP API Scan
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Log current directory
-        run: echo $PWD
-      - name: Pull ZAP OWASP Image
-        run: docker pull owasp/zap2docker-stable
-      - name: Run ZAP API scan
+
+      - name: Run OWASP ZAP Scan
         run: |
-          sudo docker run -v $PWD:/zap/wrk/:rw -t owasp/zap2docker-weekly zap-full-scan.py -t https://dev-bo.nephroplus.com -j -a
-      - name: Print ZAP Report
-        run: |
-          cat .github/workflows/zap-report.html
-      - name: Save ZAP Report as Artifact
+          docker pull ghcr.io/zaproxy/zaproxy:stable
+          docker run -v $(pwd):/zap/wrk/:rw -t owasp/zap2docker-stable zap.sh -cmd -autorun /zap/wrk/zap.yml
+
+      - name: Upload Report
         uses: actions/upload-artifact@v2
         with:
-          name: zap-scan-report
-          path: .github/workflowsk/zap-report.html
+          name: zap-report
+          path: /zap/wrk/zap-report.html
