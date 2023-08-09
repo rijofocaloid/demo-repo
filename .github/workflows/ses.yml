@@ -15,11 +15,11 @@ jobs:
       - name: Configure AWS Credentials
         run: |
           echo "[default]" > ~/.aws/credentials
-          echo "aws_access_key_id=${{ secrets.AWS_ACCESS_KEY_ID }}" >> ~/.aws/credentials
-          echo "aws_secret_access_key=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> ~/.aws/credentials
+          echo "aws_access_key_id={ AKIA6LBJHUQAB2EK2YVJ }" >> ~/.aws/credentials
+          echo "aws_secret_access_key={ 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 }" >> ~/.aws/credentials
         env:
-          AWS_ACCESS_KEY_ID: ${{ AKIA6LBJHUQAB2EK2YVJ }}
-          AWS_SECRET_ACCESS_KEY: ${{ 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 }}
+          AWS_ACCESS_KEY_ID: { AKIA6LBJHUQAB2EK2YVJ }
+          AWS_SECRET_ACCESS_KEY: { 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 }
 
       - name: Send Email via SES
         run: |
