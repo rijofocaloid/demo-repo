@@ -37,4 +37,6 @@ jobs:
             --from "rijomathew@focaloid.com" \
             --destination "ToAddresses=rijomathew@focaloid.com" \
             --message "Subject={Data=Email Subject},Body={Text={Data=Email Body}}" \
+        env:
+          AWS_DEFAULT_REGION: us-east-1
             
