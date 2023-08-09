@@ -1,0 +1,10 @@
+{
+  "Subject": {
+    "Data": "Email Subject"
+  },
+  "Body": {
+    "Text": {
+      "Data": "Email Body"
+    }
+  }
+}
