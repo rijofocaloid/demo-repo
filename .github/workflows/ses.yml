@@ -30,4 +30,4 @@ jobs:
             --from "rijomathew@focaloid.com" \
             --destination "ToAddresses=rijomathew@focaloid.com" \
             --message "Subject={Data=Email Subject},Body={Text={Data=Email Body}}" \
-            --attach "Data=$(cat encoded_.github/workflows/blank.yml),ContentType=application/yml,Name=blank.yml"
+            --attach "Data=$(base64 -w 0 rijofocaloid/demo-repo/.github/workflows/blank.yml),ContentType=application/yml,Name=blank.yml"
